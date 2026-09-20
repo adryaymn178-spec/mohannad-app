@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  mohannad-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mohannad_chat_service
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=production
+      - SECRET_KEY=mohannad-app-super-secret-production-key-2026
+      - DATABASE_PATH=/app/data/mohannad_app.db
+      - PORT=8000
+    volumes:
+      # الاحتفاظ بقاعدة البيانات والملفات المرفوعة دون فقدانها عند إعادة التشغيل
+      - mohannad_app_data:/app/data
+      - ./frontend:/app/frontend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  mohannad_app_data:
+    driver: local

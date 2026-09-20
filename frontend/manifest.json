@@ -1,0 +1,44 @@
+{
+  "name": "mohannad-app | منصة المحادثات الفورية",
+  "short_name": "mohannad-app",
+  "description": "تطبيق مراسلة فوري Full-Stack متطور يدعم المحادثات الخاصة والجماعية مع لوحة تحكم كاملة",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0b0f19",
+  "theme_color": "#2563eb",
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": [
+    "social",
+    "communication",
+    "productivity"
+  ],
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "محادثة جديدة",
+      "url": "/#new-chat",
+      "description": "بدء محادثة جديدة فوراً"
+    },
+    {
+      "name": "المجموعات",
+      "url": "/#groups",
+      "description": "عرض مجموعات المحادثة"
+    }
+  ]
+}

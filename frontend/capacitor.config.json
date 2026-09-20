@@ -1,0 +1,26 @@
+{
+  "appId": "com.mohannad.app",
+  "appName": "mohannad-app",
+  "webDir": "frontend",
+  "bundledWebRuntime": false,
+  "backgroundColor": "#0b0f19",
+  "server": {
+    "cleartext": true,
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#0b0f19",
+      "showSpinner": false,
+      "androidSpinnerStyle": "large"
+    },
+    "Keyboard": {
+      "resize": "body",
+      "style": "dark"
+    },
+    "PushNotifications": {
+      "presentationOptions": ["badge", "sound", "alert"]
+    }
+  }
+}

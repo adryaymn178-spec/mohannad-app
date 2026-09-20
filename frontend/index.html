@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>mohannad-app | منصة المحادثات الفورية</title>
+  
+  <!-- إعدادات الـ PWA -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="mohannad-app" />
+  
+  <!-- أيقونات FontAwesome وخط Cairo العربي -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-main: #0b0f19;
+      --bg-sidebar: #111827;
+      --bg-card: #1f2937;
+      --bg-hover: #374151;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --accent: #10b981;
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      --border-color: #374151;
+      --msg-outgoing: #2563eb;
+      --msg-incoming: #1f2937;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Cairo', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+    }
+
+    /* تخطيط التطبيق */
+    #app-container {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    /* الشريط الجانبي */
+    .sidebar {
+      width: 360px;
+      min-width: 320px;
+      background-color: var(--bg-sidebar);
+      border-left: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-header {
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .brand i {
+      color: var(--primary);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 8px;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover {
+      color: var(--text-main);
+      background-color: var(--bg-hover);
+    }
+
+    /* علامات التبويب */
+    .tabs-nav {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      background-color: rgba(17, 24, 39, 0.7);
+    }
+
+    .tab-item {
+      flex: 1;
+      text-align: center;
+      padding: 10px 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .tab-item.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .search-box {
+      padding: 12px 16px;
+    }
+
+    .search-input-wrapper {
+      position: relative;
+    }
+
+    .search-input-wrapper i {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 8px 38px 8px 12px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      color: var(--text-main);
+      outline: none;
+      font-size: 0.9rem;
+    }
+
+    .items-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .list-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      gap: 12px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(55, 65, 81, 0.4);
+      transition: background-color 0.2s;
+      position: relative;
+    }
+
+    .list-item:hover, .list-item.active {
+      background-color: var(--bg-hover);
+    }
+
+    .avatar-wrapper {
+      position: relative;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      background-color: var(--bg-card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: var(--primary);
+      font-size: 1.2rem;
+    }
+
+    .online-indicator {
+      width: 12px;
+      height: 12px;
+      background-color: var(--accent);
+      border: 2px solid var(--bg-sidebar);
+      border-radius: 50%;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+    }
+
+    .item-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .item-top {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .item-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-time {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .item-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .item-preview {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .unread-badge {
+      background-color: var(--primary);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 12px;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    /* مساحة المحادثة النشطة (Chat Area) */
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-main);
+      position: relative;
+    }
+
+    .chat-header {
+      padding: 12px 20px;
+      background-color: var(--bg-sidebar);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 5;
+    }
+
+    .chat-user-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .chat-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .messages-container {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background-image: radial-gradient(rgba(37, 99, 235, 0.05) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+
+    .message-row {
+      display: flex;
+      flex-direction: column;
+      max-width: 68%;
+    }
+
+    .message-row.outgoing {
+      align-self: flex-start;
+    }
+
+    .message-row.incoming {
+      align-self: flex-end;
+    }
+
+    .message-bubble {
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      position: relative;
+      word-break: break-word;
+    }
+
+    .outgoing .message-bubble {
+      background-color: var(--msg-outgoing);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+
+    .incoming .message-bubble {
+      background-color: var(--msg-incoming);
+      color: var(--text-main);
+      border-bottom-left-radius: 4px;
+    }
+
+    .message-meta {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-top: 4px;
+      font-size: 0.7rem;
+      opacity: 0.8;
+    }
+
+    /* حقل إدخال الرسائل */
+    .chat-input-area {
+      padding: 14px 20px;
+      background-color: var(--bg-sidebar);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .chat-input {
+      flex: 1;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 10px 18px;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      outline: none;
+      resize: none;
+      max-height: 100px;
+    }
+
+    .chat-input:focus {
+      border-color: var(--primary);
+    }
+
+    .send-btn {
+      background-color: var(--primary);
+      color: #fff;
+      border: none;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .send-btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    /* النوافذ المنبثقة (Modals) */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background-color: var(--bg-sidebar);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 500px;
+      overflow: hidden;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .modal-body {
+      padding: 20px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px 14px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-main);
+      outline: none;
+      font-size: 0.95rem;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    /* لوحة تحكم المالك */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background-color: var(--bg-card);
+      padding: 16px;
+      border-radius: 10px;
+      text-align: center;
+      border: 1px solid var(--border-color);
+    }
+
+    .stat-val {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* الشاشات الصغيرة (Responsive Mobile) */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        position: absolute;
+        inset: 0;
+      }
+      .sidebar.hidden-mobile {
+        transform: translateX(100%);
+      }
+      .chat-area {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div id="app-container">
+  <!-- الشريط الجانبي (Sidebar) -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="brand">
+        <i class="fa-solid fa-paper-plane"></i>
+        <span>mohannad-app</span>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="btn-owner-panel" title="لوحة المالك" style="display:none;" onclick="openOwnerDashboard()">
+          <i class="fa-solid fa-crown" style="color: #f59e0b;"></i>
+        </button>
+        <button class="icon-btn" title="إنشاء مجموعة" onclick="openCreateGroupModal()">
+          <i class="fa-solid fa-users-plus"></i>
+        </button>
+        <button class="icon-btn" title="إضافة جهة اتصال" onclick="openAddContactModal()">
+          <i class="fa-solid fa-user-plus"></i>
+        </button>
+        <button class="icon-btn" title="الجلسات والأجهزة" onclick="openSessionsModal()">
+          <i class="fa-solid fa-laptop-mobile"></i>
+        </button>
+        <button class="icon-btn" title="تسجيل الخروج" onclick="handleLogout()">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- تبويبات الشريط الجانبي -->
+    <div class="tabs-nav">
+      <div class="tab-item active" onclick="switchSidebarTab('chats')">المحادثات</div>
+      <div class="tab-item" onclick="switchSidebarTab('contacts')">جهات الاتصال</div>
+      <div class="tab-item" onclick="switchSidebarTab('groups')">المجموعات</div>
+    </div>
+
+    <!-- شريط البحث -->
+    <div class="search-box">
+      <div class="search-input-wrapper">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" class="search-input" id="sidebar-search" placeholder="بحث..." oninput="handleSearch(this.value)" />
+      </div>
+    </div>
+
+    <!-- قائمة العناصر (محادثات / أصدقاء / مجموعات) -->
+    <div class="items-list" id="items-list">
+      <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+        <i class="fa-solid fa-spinner fa-spin fa-2x"></i>
+        <p style="margin-top: 10px;">جاري تحميل المحادثات...</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- مساحة المحادثة الفعالة (Chat Area) -->
+  <main class="chat-area" id="chat-area">
+    <div class="chat-header" id="chat-header">
+      <div class="chat-user-meta">
+        <button class="icon-btn" id="btn-back-sidebar" onclick="showSidebar()" style="display: none;">
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+        <div class="avatar-wrapper" id="active-chat-avatar">
+          <div class="avatar">؟</div>
+        </div>
+        <div>
+          <h3 id="active-chat-title" style="font-size: 1rem;">اختر محادثة للبدء</h3>
+          <span id="active-chat-status" style="font-size: 0.75rem; color: var(--accent);">متصل الآن</span>
+        </div>
+      </div>
+      <div class="chat-actions">
+        <button class="icon-btn" title="مكالمة صوتية"><i class="fa-solid fa-phone"></i></button>
+        <button class="icon-btn" title="مكالمة فيديو"><i class="fa-solid fa-video"></i></button>
+        <button class="icon-btn" title="خيارات"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+      </div>
+    </div>
+
+    <!-- حاوية الرسائل -->
+    <div class="messages-container" id="messages-container">
+      <div style="margin: auto; text-align: center; color: var(--text-muted);">
+        <i class="fa-solid fa-comments fa-3x" style="margin-bottom: 12px; color: var(--border-color);"></i>
+        <p>ابدأ بمراسلة أصدقائك ومجموعاتك فوراً وبأعلى درجات الأمان</p>
+      </div>
+    </div>
+
+    <!-- حقل الإدخال والإرسال -->
+    <div class="chat-input-area" id="chat-input-area" style="display: none;">
+      <button class="icon-btn" title="مرفق وسائط"><i class="fa-solid fa-paperclip"></i></button>
+      <input type="text" class="chat-input" id="message-input" placeholder="اكتب رسالتك هنا..." onkeydown="if(event.key === 'Enter') sendMessage()" />
+      <button class="send-btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+  </main>
+</div>
+
+<!-- ================= نافذة المصادقة (دخول / تسجيل) ================= -->
+<div class="modal-overlay active" id="auth-modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <span id="auth-title">تسجيل الدخول إلى mohannad-app</span>
+    </div>
+    <div class="modal-body">
+      <form id="auth-form" onsubmit="handleAuthSubmit(event)">
+        <div class="form-group" id="group-fullname" style="display:none;">
+          <label class="form-label">الاسم الكامل</label>
+          <input type="text" id="auth-fullname" class="form-control" placeholder="مهند أحمد" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">اسم المستخدم أو البريد الإلكتروني</label>
+          <input type="text" id="auth-identifier" class="form-control" required placeholder="username أو email@domain.com" />
+        </div>
+        <div class="form-group" id="group-email" style="display:none;">
+          <label class="form-label">البريد الإلكتروني</label>
+          <input type="email" id="auth-email" class="form-control" placeholder="user@domain.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">كلمة المرور</label>
+          <input type="password" id="auth-password" class="form-control" required placeholder="••••••••" />
+        </div>
+        <button type="submit" class="btn-primary" id="auth-submit-btn">دخول</button>
+        <p style="text-align: center; margin-top: 14px; font-size: 0.85rem;">
+          <span id="auth-toggle-msg">ليس لديك حساب؟</span>
+          <a href="javascript:void(0)" onclick="toggleAuthMode()" id="auth-toggle-btn" style="color: var(--primary); font-weight: 700; text-decoration: none;">تسجيل حساب جديد</a>
+        </p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ================= نافذة لوحة تحكم المالك (Owner Dashboard) ================= -->
+<div class="modal-overlay" id="owner-modal">
+  <div class="modal-card" style="max-width: 650px;">
+    <div class="modal-header">
+      <span>👑 لوحة تحكم مالك التطبيق</span>
+      <button class="icon-btn" onclick="closeModal('owner-modal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="dashboard-grid">
+        <div class="stat-card">
+          <div class="stat-val" id="stat-users">0</div>
+          <div class="stat-label">المستخدمين النشطين</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="stat-messages">0</div>
+          <div class="stat-label">إجمالي الرسائل</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="stat-groups">0</div>
+          <div class="stat-label">المجموعات</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="stat-sessions">0</div>
+          <div class="stat-label">الجلسات المفتوحة</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">📢 إرسال إعلان عام لجميع مستخدمي التطبيق (Broadcast)</label>
+        <input type="text" id="broadcast-title" class="form-control" placeholder="عنوان الإعلان" style="margin-bottom: 8px;" />
+        <textarea id="broadcast-content" class="form-control" rows="3" placeholder="اكتب رسالة الإشعار العام هنا..."></textarea>
+        <button class="btn-primary" style="margin-top: 8px;" onclick="sendBroadcast()">إرسال الإعلان للجميع</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= نافذة إضافة جهة اتصال ================= -->
+<div class="modal-overlay" id="add-contact-modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <span>إضافة جهة اتصال جديدة</span>
+      <button class="icon-btn" onclick="closeModal('add-contact-modal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">اسم المستخدم أو البريد الإلكتروني</label>
+        <input type="text" id="contact-ident" class="form-control" placeholder="أدخل اسم الحساب..." />
+      </div>
+      <button class="btn-primary" onclick="submitAddContact()">إضافة إلى الأصدقاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= نافذة إنشاء مجموعة ================= -->
+<div class="modal-overlay" id="create-group-modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <span>إنشاء مجموعة محادثة</span>
+      <button class="icon-btn" onclick="closeModal('create-group-modal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">اسم المجموعة</label>
+        <input type="text" id="group-name" class="form-control" placeholder="مثال: فريق العمل التقني" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">وصف المجموعة</label>
+        <input type="text" id="group-desc" class="form-control" placeholder="نبذة عن الهدف من المجموعة..." />
+      </div>
+      <button class="btn-primary" onclick="submitCreateGroup()">إنشاء المجموعة</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= نافذة إدارة الجلسات والأجهزة ================= -->
+<div class="modal-overlay" id="sessions-modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <span>الأجهزة والجلسات النشطة</span>
+      <button class="icon-btn" onclick="closeModal('sessions-modal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div id="sessions-list" style="margin-bottom: 16px;"></div>
+      <button class="btn-primary" style="background-color: var(--danger);" onclick="terminateAllOtherSessions()">تسجيل الخروج من كل الأجهزة الأخرى</button>
+    </div>
+  </div>
+</div>
+
+<!-- البرمجة التشغيلية للواجهة والربط بالخادم -->
+<script>
+  let state = {
+    token: localStorage.getItem('token') || null,
+    user: JSON.parse(localStorage.getItem('user') || '{}'),
+    activeChat: null, // { type: 'direct' | 'group', id: string, name: string }
+    tab: 'chats',
+    ws: null
+  };
+
+  const API_BASE = '/api';
+
+  // تسجيل الـ Service Worker لتمكين PWA
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW failed:', err));
+    });
+  }
+
+  // التهيئة المبدئية
+  document.addEventListener('DOMContentLoaded', () => {
+    if (state.token && state.user.id) {
+      document.getElementById('auth-modal').classList.remove('active');
+      initApp();
+    }
+  });
+
+  function initApp() {
+    if (state.user.role === 'owner' || state.user.role === 'admin') {
+      document.getElementById('btn-owner-panel').style.display = 'inline-block';
+    }
+    loadSidebarData();
+    connectWebSocket();
+  }
+
+  // الاتصال بالـ WebSocket
+  function connectWebSocket() {
+    const wsProto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${wsProto}//${window.location.host}/ws?token=${state.token}`;
+    
+    try {
+      state.ws = new WebSocket(wsUrl);
+      state.ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        handleIncomingWsMessage(data);
+      };
+      state.ws.onclose = () => {
+        setTimeout(connectWebSocket, 4000);
+      };
+    } catch(e) {
+      console.warn("WebSocket fallback mode");
+    }
+  }
+
+  function handleIncomingWsMessage(msg) {
+    if (state.activeChat && (msg.sender_id === state.activeChat.id || msg.group_id === state.activeChat.id)) {
+      renderMessageItem(msg);
+      scrollToBottom();
+    }
+    loadSidebarData();
+  }
+
+  // تبديل شاشات المصادقة (دخول / تسجيل)
+  let isRegisterMode = false;
+  function toggleAuthMode() {
+    isRegisterMode = !isRegisterMode;
+    document.getElementById('auth-title').innerText = isRegisterMode ? 'إنشاء حساب جديد في mohannad-app' : 'تسجيل الدخول إلى mohannad-app';
+    document.getElementById('group-fullname').style.display = isRegisterMode ? 'block' : 'none';
+    document.getElementById('group-email').style.display = isRegisterMode ? 'block' : 'none';
+    document.getElementById('auth-submit-btn').innerText = isRegisterMode ? 'تسجيل حساب جديد' : 'دخول';
+    document.getElementById('auth-toggle-msg').innerText = isRegisterMode ? 'لديك حساب بالفعل؟' : 'ليس لديك حساب؟';
+    document.getElementById('auth-toggle-btn').innerText = isRegisterMode ? 'تسجيل الدخول' : 'تسجيل حساب جديد';
+  }
+
+  async function handleAuthSubmit(e) {
+    e.preventDefault();
+    const endpoint = isRegisterMode ? `${API_BASE}/auth/register` : `${API_BASE}/auth/login`;
+    const payload = isRegisterMode ? {
+      username: document.getElementById('auth-identifier').value.trim(),
+      email: document.getElementById('auth-email').value.trim(),
+      full_name: document.getElementById('auth-fullname').value.trim(),
+      password: document.getElementById('auth-password').value
+    } : {
+      username_or_email: document.getElementById('auth-identifier').value.trim(),
+      password: document.getElementById('auth-password').value,
+      device_name: navigator.userAgent.includes('Mobile') ? 'Mobile App' : 'Desktop Browser'
+    };
+
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || 'حدث خطأ في المصادقة');
+
+      state.token = data.access_token;
+      state.user = data.user;
+      localStorage.setItem('token', state.token);
+      localStorage.setItem('user', JSON.stringify(state.user));
+
+      document.getElementById('auth-modal').classList.remove('active');
+      initApp();
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+
+  // تحميل قائمة المحادثات وجهات الاتصال
+  async function loadSidebarData() {
+    const listEl = document.getElementById('items-list');
+    try {
+      let res, data;
+      if (state.tab === 'chats') {
+        res = await fetch(`${API_BASE}/messages/conversations`, {
+          headers: { 'Authorization': `Bearer ${state.token}` }
+        });
+        data = await res.json();
+        renderConversations(data);
+      } else if (state.tab === 'contacts') {
+        res = await fetch(`${API_BASE}/contacts`, {
+          headers: { 'Authorization': `Bearer ${state.token}` }
+        });
+        data = await res.json();
+        renderContacts(data.contacts);
+      } else if (state.tab === 'groups') {
+        res = await fetch(`${API_BASE}/groups`, {
+          headers: { 'Authorization': `Bearer ${state.token}` }
+        });
+        data = await res.json();
+        renderGroups(data.groups);
+      }
+    } catch(e) {
+      listEl.innerHTML = `<div style="text-align:center; padding:20px; color:var(--danger);">تعذر تحميل البيانات</div>`;
+    }
+  }
+
+  function renderConversations(data) {
+    const listEl = document.getElementById('items-list');
+    listEl.innerHTML = '';
+    const convs = [...(data.direct_conversations || []), ...(data.group_conversations || [])];
+
+    if (convs.length === 0) {
+      listEl.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted);">لا توجد محادثات نشطة حالياً</div>`;
+      return;
+    }
+
+    convs.forEach(c => {
+      const isGroup = !!c.group_id;
+      const id = isGroup ? c.group_id : c.peer_id;
+      const name = isGroup ? c.group_name : (c.full_name || c.username);
+      const preview = c.last_message_content || 'لا توجد رسائل سابقة';
+
+      const div = document.createElement('div');
+      div.className = `list-item ${state.activeChat && state.activeChat.id === id ? 'active' : ''}`;
+      div.onclick = () => selectChat(isGroup ? 'group' : 'direct', id, name);
+      div.innerHTML = `
+        <div class="avatar-wrapper">
+          <div class="avatar">${name.charAt(0)}</div>
+          ${!isGroup ? '<div class="online-indicator"></div>' : ''}
+        </div>
+        <div class="item-info">
+          <div class="item-top">
+            <span class="item-name">${name}</span>
+            <span class="item-time">${c.last_message_time ? new Date(c.last_message_time).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'}) : ''}</span>
+          </div>
+          <div class="item-bottom">
+            <span class="item-preview">${preview}</span>
+            ${c.unread_count > 0 ? `<span class="unread-badge">${c.unread_count}</span>` : ''}
+          </div>
+        </div>
+      `;
+      listEl.appendChild(div);
+    });
+  }
+
+  function renderContacts(contacts) {
+    const listEl = document.getElementById('items-list');
+    listEl.innerHTML = '';
+    contacts.forEach(c => {
+      const div = document.createElement('div');
+      div.className = 'list-item';
+      div.onclick = () => selectChat('direct', c.user_id, c.full_name || c.username);
+      div.innerHTML = `
+        <div class="avatar-wrapper"><div class="avatar">${c.username.charAt(0)}</div></div>
+        <div class="item-info">
+          <div class="item-top"><span class="item-name">${c.full_name || c.username}</span></div>
+          <div class="item-bottom"><span class="item-preview">@${c.username}</span></div>
+        </div>
+      `;
+      listEl.appendChild(div);
+    });
+  }
+
+  function renderGroups(groups) {
+    const listEl = document.getElementById('items-list');
+    listEl.innerHTML = '';
+    groups.forEach(g => {
+      const div = document.createElement('div');
+      div.className = 'list-item';
+      div.onclick = () => selectChat('group', g.id, g.name);
+      div.innerHTML = `
+        <div class="avatar-wrapper"><div class="avatar"><i class="fa-solid fa-users"></i></div></div>
+        <div class="item-info">
+          <div class="item-top"><span class="item-name">${g.name}</span></div>
+          <div class="item-bottom"><span class="item-preview">${g.members_count} عضو</span></div>
+        </div>
+      `;
+      listEl.appendChild(div);
+    });
+  }
+
+  // اختيار محادثة وعرض الرسائل
+  async function selectChat(type, id, name) {
+    state.activeChat = { type, id, name };
+    document.getElementById('active-chat-title').innerText = name;
+    document.getElementById('active-chat-avatar').innerHTML = `<div class="avatar">${name.charAt(0)}</div>`;
+    document.getElementById('chat-input-area').style.display = 'flex';
+
+    if (window.innerWidth <= 768) {
+      document.getElementById('sidebar').classList.add('hidden-mobile');
+      document.getElementById('btn-back-sidebar').style.display = 'inline-block';
+    }
+
+    loadChatMessages();
+  }
+
+  async function loadChatMessages() {
+    const container = document.getElementById('messages-container');
+    container.innerHTML = `<div style="text-align:center; padding:20px;"><i class="fa-solid fa-spinner fa-spin"></i></div>`;
+
+    const endpoint = state.activeChat.type === 'direct' 
+      ? `${API_BASE}/messages/direct/${state.activeChat.id}`
+      : `${API_BASE}/messages/group/${state.activeChat.id}`;
+
+    try {
+      const res = await fetch(endpoint, {
+        headers: { 'Authorization': `Bearer ${state.token}` }
+      });
+      const data = await res.json();
+      container.innerHTML = '';
+      (data.messages || []).forEach(renderMessageItem);
+      scrollToBottom();
+    } catch(e) {
+      container.innerHTML = `<div style="text-align:center; color:var(--danger)">فشل تحميل الرسائل</div>`;
+    }
+  }
+
+  function renderMessageItem(msg) {
+    const container = document.getElementById('messages-container');
+    const isOut = (msg.sender_id === state.user.id);
+    const timeStr = new Date(msg.created_at).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'});
+
+    const row = document.createElement('div');
+    row.className = `message-row ${isOut ? 'outgoing' : 'incoming'}`;
+    row.innerHTML = `
+      <div class="message-bubble">
+        ${!isOut && state.activeChat.type === 'group' ? `<div style="font-size:0.75rem; font-weight:bold; color:var(--primary);">${msg.sender_username || ''}</div>` : ''}
+        <div>${msg.content}</div>
+        <div class="message-meta">
+          <span>${timeStr}</span>
+          ${isOut ? '<i class="fa-solid fa-check-double"></i>' : ''}
+        </div>
+      </div>
+    `;
+    container.appendChild(row);
+  }
+
+  // إرسال رسالة
+  async function sendMessage() {
+    const input = document.getElementById('message-input');
+    const text = input.value.trim();
+    if (!text || !state.activeChat) return;
+
+    input.value = '';
+    const isDirect = (state.activeChat.type === 'direct');
+    const endpoint = isDirect ? `${API_BASE}/messages/direct` : `${API_BASE}/messages/group`;
+    const payload = isDirect 
+      ? { recipient_id: state.activeChat.id, content: text, message_type: 'text' }
+      : { group_id: state.activeChat.id, content: text, message_type: 'text' };
+
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${state.token}`
+        },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      renderMessageItem(data);
+      scrollToBottom();
+      loadSidebarData();
+    } catch (e) {
+      alert("فشل إرسال الرسالة");
+    }
+  }
+
+  function scrollToBottom() {
+    const container = document.getElementById('messages-container');
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function showSidebar() {
+    document.getElementById('sidebar').classList.remove('hidden-mobile');
+    document.getElementById('btn-back-sidebar').style.display = 'none';
+  }
+
+  function switchSidebarTab(tab) {
+    state.tab = tab;
+    document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
+    event.target.classList.add('active');
+    loadSidebarData();
+  }
+
+  // النوافذ وإدارة المالك
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+  }
+
+  async function openOwnerDashboard() {
+    document.getElementById('owner-modal').classList.add('active');
+    try {
+      const res = await fetch(`${API_BASE}/admin/dashboard/stats`, {
+        headers: { 'Authorization': `Bearer ${state.token}` }
+      });
+      const data = await res.json();
+      document.getElementById('stat-users').innerText = data.users.active;
+      document.getElementById('stat-messages').innerText = data.messages.total;
+      document.getElementById('stat-groups').innerText = data.groups.total;
+      document.getElementById('stat-sessions').innerText = data.sessions.active_now;
+    } catch (e) {
+      alert("فشل استدعاء بيانات لوحة المالك");
+    }
+  }
+
+  async function sendBroadcast() {
+    const title = document.getElementById('broadcast-title').value.trim();
+    const content = document.getElementById('broadcast-content').value.trim();
+    if (!title || !content) return alert("الرجاء كتابة العنوان والمحتوى");
+
+    try {
+      await fetch(`${API_BASE}/admin/broadcast`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${state.token}`
+        },
+        body: JSON.stringify({ title, content })
+      });
+      alert("تم إرسال الإشعار لجميع المستخدمين بنجاح");
+      closeModal('owner-modal');
+    } catch(e) {
+      alert("تعذر الإرسال");
+    }
+  }
+
+  function openAddContactModal() {
+    document.getElementById('add-contact-modal').classList.add('active');
+  }
+
+  async function submitAddContact() {
+    const ident = document.getElementById('contact-ident').value.trim();
+    if (!ident) return;
+    try {
+      const res = await fetch(`${API_BASE}/contacts/add`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${state.token}`
+        },
+        body: JSON.stringify({ identifier: ident })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail);
+      alert(data.message);
+      closeModal('add-contact-modal');
+      loadSidebarData();
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+
+  function openCreateGroupModal() {
+    document.getElementById('create-group-modal').classList.add('active');
+  }
+
+  async function submitCreateGroup() {
+    const name = document.getElementById('group-name').value.trim();
+    const desc = document.getElementById('group-desc').value.trim();
+    if (!name) return alert("يرجى إدخال اسم المجموعة");
+
+    try {
+      const res = await fetch(`${API_BASE}/groups`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${state.token}`
+        },
+        body: JSON.stringify({ name, description: desc })
+      });
+      if (!res.ok) throw new Error("تعذر إنشاء المجموعة");
+      alert("تم إنشاء المجموعة بنجاح");
+      closeModal('create-group-modal');
+      loadSidebarData();
+    } catch(e) {
+      alert(e.message);
+    }
+  }
+
+  async function openSessionsModal() {
+    document.getElementById('sessions-modal').classList.add('active');
+    const container = document.getElementById('sessions-list');
+    container.innerHTML = 'جاري التحميل...';
+    try {
+      const res = await fetch(`${API_BASE}/sessions/me`, {
+        headers: { 'Authorization': `Bearer ${state.token}` }
+      });
+      const data = await res.json();
+      container.innerHTML = '';
+      (data.sessions || []).forEach(s => {
+        const div = document.createElement('div');
+        div.style = "padding: 8px; border-bottom: 1px solid var(--border-color); display:flex; justify-content:space-between;";
+        div.innerHTML = `
+          <div>
+            <b>${s.device_name || 'جهاز مجهول'}</b> ${s.is_current ? '<span style="color:var(--accent);">(الجلسة الحالية)</span>' : ''}
+            <div style="font-size:0.75rem; color:var(--text-muted);">${s.ip_address} | ${new Date(s.last_active_at).toLocaleString('ar-EG')}</div>
+          </div>
+          ${!s.is_current ? `<button onclick="terminateSession('${s.id}')" style="color:var(--danger); background:none; border:none; cursor:pointer;">إنهاء</button>` : ''}
+        `;
+        container.appendChild(div);
+      });
+    } catch(e) {
+      container.innerHTML = 'تعذر جلب الجلسات';
+    }
+  }
+
+  async function terminateSession(sessionId) {
+    await fetch(`${API_BASE}/sessions/${sessionId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${state.token}` }
+    });
+    openSessionsModal();
+  }
+
+  async function terminateAllOtherSessions() {
+    if (!confirm("هل أنت متأكد من رغبتك في تسجيل الخروج من كافة الأجهزة الأخرى؟")) return;
+    await fetch(`${API_BASE}/sessions/all/other`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${state.token}` }
+    });
+    alert("تم إنهاء الجلسات الأخرى بنجاح");
+    closeModal('sessions-modal');
+  }
+
+  function handleLogout() {
+    if (confirm("هل ترغب بالفعل في تسجيل الخروج؟")) {
+      fetch(`${API_BASE}/auth/logout`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${state.token}` }
+      });
+      localStorage.clear();
+      window.location.reload();
+    }
+  }
+</script>
+</body>
+</html>

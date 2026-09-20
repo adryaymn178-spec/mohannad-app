@@ -1,0 +1,36 @@
+{
+  "name": "mohannad-app",
+  "version": "1.0.0",
+  "description": "Full-Stack messaging application with Capacitor & PWA support",
+  "main": "backend/server.py",
+  "scripts": {
+    "start": "python backend/server.py",
+    "cap:sync": "cap sync",
+    "cap:add:android": "cap add android",
+    "cap:add:ios": "cap add ios",
+    "cap:open:android": "cap open android",
+    "cap:open:ios": "cap open ios",
+    "cap:build": "cap sync && cap copy"
+  },
+  "keywords": [
+    "chat",
+    "fastapi",
+    "pwa",
+    "capacitor",
+    "realtime",
+    "messaging"
+  ],
+  "author": "Mohannad",
+  "license": "MIT",
+  "dependencies": {
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/ios": "^6.0.0",
+    "@capacitor/keyboard": "^6.0.0",
+    "@capacitor/push-notifications": "^6.0.0",
+    "@capacitor/splash-screen": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0"
+  }
+}
