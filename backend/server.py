@@ -8,7 +8,7 @@ import sys
 import threading
 import urllib.parse
 import websockets
-
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import api
 import auth
 import database
