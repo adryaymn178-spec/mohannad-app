@@ -45,7 +45,7 @@ class BroadcasterBridge:
         for m in members:
             self.send_to_user(m, message)
 
-api_controller = api.APIHandler()
+app.include_router(api.router, prefix="/api")
 
 class MohannadHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
     def end_headers(self):
