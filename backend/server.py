@@ -44,7 +44,8 @@ class BroadcasterBridge:
         conn.close()
         for m in members:
             self.send_to_user(m, message)
-
+from fastapi import FastAPI
+app = FastAPI()
 app.include_router(api.router, prefix="/api")
 
 class MohannadHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
