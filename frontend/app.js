@@ -9,8 +9,8 @@
 (function () {
     // --- Application Configuration & State ---
     const CONFIG = {
-        API_BASE: 'http://localhost:3000/api',
-        WS_URL: 'ws://localhost:3000/ws',
+        API_BASE: 'https://web-production-32ffba.up.railway.app/api',
+        WS_URL: 'wss://web-production-32ffba.up.railway.app/ws',
         RECONNECT_INTERVAL: 3000,
         MAX_RECONNECT_ATTEMPTS: 10,
         STORAGE_KEYS: {
